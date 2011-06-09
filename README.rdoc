@@ -9,9 +9,17 @@ I (Preston Lee) am not trying to hijack Peter Hoeg or Javier's project, but rath
 = System Requirements
 
 You MUST have the the following utilities available at the command line.
-  * `dot` and `neato`. MacPorts users can install in via `sudo port install graphviz`.
+  * `dot` and `neato`.
 
   * `sed`, which should already be available on all sane UNIX systems.
+
+= Mac users
+
+MacPorts users can install in via `sudo port install graphviz`.
+
+= Ubuntu users
+
+Ubuntu users can install in via `sudo apt-get install graphviz`.
 
 = Usage
 
