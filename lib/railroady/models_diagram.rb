@@ -122,7 +122,7 @@ class ModelsDiagram < AppDiagram
     
     # from patch #12384
     # if assoc.class_name == assoc.name.to_s.singularize.camelize
-    assoc_class_name = (assoc.class_name.respond_to? 'underscore') ? assoc.class_name.underscore.singularize.camelize : assoc.class_name 
+    assoc_class_name = (assoc.class_name.respond_to? 'underscore') ? assoc.class_name.underscore.camelize : assoc.class_name
     if assoc_class_name == assoc.name.to_s.singularize.camelize
       assoc_name = ''
     else
