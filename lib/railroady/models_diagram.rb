@@ -8,10 +8,8 @@ require 'railroady/app_diagram'
 
 # RailRoady models diagram
 class ModelsDiagram < AppDiagram
-
   def initialize(options = OptionsStruct.new)
-    #options.exclude.map! {|e| "app/models/" + e}
-    super options 
+    super options
     @graph.diagram_type = 'Models'
     # Processed habtm associations
     @habtm = []
@@ -19,12 +17,12 @@ class ModelsDiagram < AppDiagram
 
   # Process model files
   def generate
-    STDERR.print "Generating models diagram\n" if @options.verbose
+    STDERR.puts "Generating models diagram" if @options.verbose
     get_files.each do |f|
       begin
         process_class extract_class_name(f).constantize
       rescue Exception
-        STDERR.print "Warning: exception #{$!} raised while trying to load model class #{f}\n"
+        STDERR.puts "Warning: exception #{$!} raised while trying to load model class #{f}"
       end
 
     end
@@ -39,90 +37,154 @@ class ModelsDiagram < AppDiagram
 
   # Process a model class
   def process_class(current_class)
-
-    STDERR.print "\tProcessing #{current_class}\n" if @options.verbose
-
-    generated = false
-        
-    # Is current_clas derived from ActiveRecord::Base?
-    if current_class.respond_to?'reflect_on_all_associations'
-
-
-      node_attribs = []
-      if @options.brief || current_class.abstract_class?
-        node_type = 'model-brief'
-      else 
-        node_type = 'model'
-
-        # Collect model's content columns
-
-        content_columns = current_class.content_columns
-	
-        if @options.hide_magic 
-          # From patch #13351
-          # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
-          magic_fields = [
-          "created_at", "created_on", "updated_at", "updated_on",
-          "lock_version", "type", "id", "position", "parent_id", "lft", 
-          "rgt", "quote", "template"
-          ]
-          magic_fields << current_class.table_name + "_count" if current_class.respond_to? 'table_name' 
-          content_columns = current_class.content_columns.select {|c| ! magic_fields.include? c.name}
-        else
-          content_columns = current_class.content_columns
-        end
-        
-        content_columns.each do |a|
-          content_column = a.name
-          content_column += ' :' + a.type.to_s unless @options.hide_types
-          node_attribs << content_column
-        end
-      end
-      @graph.add_node [node_type, current_class.name, node_attribs]
-      generated = true
-      # Process class associations
-      associations = current_class.reflect_on_all_associations
-      if @options.inheritance && ! @options.transitive
-        superclass_associations = current_class.superclass.reflect_on_all_associations
-        
-        associations = associations.select{|a| ! superclass_associations.include? a} 
-        # This doesn't works!
-        # associations -= current_class.superclass.reflect_on_all_associations
-      end
-      associations.each do |a|
-        process_association current_class.name, a
-      end
+    STDERR.puts "Processing #{current_class}" if @options.verbose
+    
+    generated = if current_class.new.is_a?(Mongoid::Document)
+      process_mongoid_model(current_class)
+    elsif current_class.respond_to?'reflect_on_all_associations'
+      process_active_record_model(current_class)
     elsif @options.all && (current_class.is_a? Class)
-      # Not ActiveRecord::Base model
-      node_type = @options.brief ? 'class-brief' : 'class'
-      @graph.add_node [node_type, current_class.name]
-      generated = true
+      process_basic_class(current_class)
     elsif @options.modules && (current_class.is_a? Module)
-        @graph.add_node ['module', current_class.name]
+      process_basic_module(current_class)
     end
 
-    # Only consider meaningful inheritance relations for generated classes
-    if @options.inheritance && generated && 
-       (current_class.superclass != ActiveRecord::Base) &&
-       (current_class.superclass != Object)
+    if @options.inheritance && generated && include_inheritance?(current_class)
       @graph.add_edge ['is-a', current_class.superclass.name, current_class.name]
     end      
-
+    
   end # process_class
+  
+  def include_inheritance?(current_class)
+    (defined?(ActiveRecord::Base) && current_class.superclass != ActiveRecord::Base) &&
+    (current_class.superclass != Object)
+  end
+  
+  def process_basic_class(current_class)
+    node_type = @options.brief ? 'class-brief' : 'class'
+    @graph.add_node [node_type, current_class.name]
+    true
+  end
+  
+  def process_basic_module(current_class)
+    @graph.add_node ['module', current_class.name]
+    false
+  end
+
+  def process_active_record_model(current_class)
+    node_attribs = []
+    if @options.brief || current_class.abstract_class?
+      node_type = 'model-brief'
+    else
+      node_type = 'model'
+
+      # Collect model's content columns
+    	content_columns = current_class.content_columns
+
+    	if @options.hide_magic
+        # From patch #13351
+        # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
+        magic_fields = [
+        "created_at", "created_on", "updated_at", "updated_on",
+        "lock_version", "type", "id", "position", "parent_id", "lft", 
+        "rgt", "quote", "template"
+        ]
+        magic_fields << current_class.table_name + "_count" if current_class.respond_to? 'table_name' 
+        content_columns = current_class.content_columns.select {|c| ! magic_fields.include? c.name}
+      else
+        content_columns = current_class.content_columns
+      end
+      
+      content_columns.each do |a|
+        content_column = a.name
+        content_column += ' :' + a.type.to_s unless @options.hide_types
+        node_attribs << content_column
+      end
+    end
+    @graph.add_node [node_type, current_class.name, node_attribs]
+    
+    # Process class associations
+    associations = current_class.reflect_on_all_associations
+    if @options.inheritance && ! @options.transitive
+      superclass_associations = current_class.superclass.reflect_on_all_associations
+      
+      associations = associations.select{|a| ! superclass_associations.include? a} 
+      # This doesn't works!
+      # associations -= current_class.superclass.reflect_on_all_associations
+    end
+    
+    associations.each do |a|
+      process_association current_class.name, a
+    end
+    
+    true
+  end
+  
+  def process_mongoid_model(current_class)
+    node_attribs = []
+    
+    if @options.brief
+      node_type = 'model-brief'
+    else
+      node_type = 'model'
+
+      # Collect model's content columns
+    	content_columns = current_class.fields.values.sort_by(&:name)
+
+    	if @options.hide_magic
+        # From patch #13351
+        # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
+        magic_fields = [
+        "created_at", "created_on", "updated_at", "updated_on",
+        "lock_version", "_type", "_id", "position", "parent_id", "lft",
+        "rgt", "quote", "template"
+        ]
+        content_columns = content_columns.select {|c| !magic_fields.include?(c.name) }
+      end
+      
+      content_columns.each do |a|
+        content_column = a.name
+        content_column += " :#{a.type}" unless @options.hide_types
+        node_attribs << content_column
+      end
+    end
+    
+    @graph.add_node [node_type, current_class.name, node_attribs]
+    
+    # Process class associations
+    associations = current_class.relations.values
+    
+    if @options.inheritance && !@options.transitive &&
+       current_class.superclass.respond_to?(:relations)
+      associations -= current_class.superclass.relations.values
+    end
+    
+    associations.each do |a|
+      process_association current_class.name, a
+    end
+    
+    true
+  end
+  
 
   # Process a model association
   def process_association(class_name, assoc)
-
-    STDERR.print "\t\tProcessing model association #{assoc.name.to_s}\n" if @options.verbose
+    STDERR.puts "- Processing model association #{assoc.name.to_s}" if @options.verbose
 
     # Skip "belongs_to" associations
-    return if assoc.macro.to_s == 'belongs_to' && !@options.show_belongs_to
+    macro = assoc.macro.to_s
+    return if %w[belongs_to referenced_in].include?(macro) && !@options.show_belongs_to
 
     # Only non standard association names needs a label
     
     # from patch #12384
     # if assoc.class_name == assoc.name.to_s.singularize.camelize
-    assoc_class_name = (assoc.class_name.respond_to? 'underscore') ? assoc.class_name.underscore.singularize.camelize : assoc.class_name 
+    assoc_class_name = if assoc.class_name.respond_to? 'underscore'
+      assoc.class_name.underscore.singularize.camelize
+    else
+      assoc.class_name
+    end
+    
     if assoc_class_name == assoc.name.to_s.singularize.camelize
       assoc_name = ''
     else
@@ -135,9 +197,10 @@ class ModelsDiagram < AppDiagram
     end
     assoc_class_name.gsub!(%r{^::}, '')
 
-    if ['has_one', 'belongs_to'].include? assoc.macro.to_s
+    if %w[has_one references_one embeds_one].include?(macro)
       assoc_type = 'one-one'
-    elsif assoc.macro.to_s == 'has_many' && (! assoc.options[:through])
+    elsif macro == 'has_many' && (!assoc.options[:through]) ||
+          %w[references_many embeds_many].include?(macro)
       assoc_type = 'one-many'
     else # habtm or has_many, :through
       return if @habtm.include? [assoc.class_name, class_name, assoc_name]
@@ -148,5 +211,4 @@ class ModelsDiagram < AppDiagram
     # @graph.add_edge [assoc_type, class_name, assoc.class_name, assoc_name]
     @graph.add_edge [assoc_type, class_name, assoc_class_name, assoc_name]    
   end # process_association
-
 end # class ModelsDiagram
