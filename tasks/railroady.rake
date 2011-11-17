@@ -6,57 +6,61 @@
 # * The `sed` command-line utility, which should already be available on all sane UNIX systems.
 #
 # Author: Preston Lee, http://railroady.prestonlee.com 
- 
+
 # Returns an absolute path for the following file.
+def format
+  @@DIAGRAM_FORMAT ||= 'SVG'
+end
+
 def full_path(name = 'test.txt')
   f = File.join(Rails.root.to_s.gsub(' ', '\ '), 'doc', name)
   f.to_s
 end
-  
+
 namespace :diagram do
- 
-  @MODELS_ALL_SVG = full_path('models_complete.svg').freeze
-  @MODELS_BRIEF_SVG = full_path('models_brief.svg').freeze
-  @CONTROLLERS_ALL_SVG = full_path('controllers_complete.svg').freeze
-  @CONTROLLERS_BRIEF_SVG = full_path('controllers_brief.svg').freeze
- 
+
+  @MODELS_ALL = full_path("models_complete.#{format}").freeze
+  @MODELS_BRIEF = full_path("models_brief.#{format}").freeze
+  @CONTROLLERS_ALL = full_path("controllers_complete.#{format}").freeze
+  @CONTROLLERS_BRIEF = full_path("controllers_brief.#{format}").freeze
+
   namespace :models do
- 
-    desc 'Generates an SVG class diagram for all models.'
+
+    desc 'Generates an class diagram for all models.'
     task :complete do
-      f = @MODELS_ALL_SVG
+      f = @MODELS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilamM | dot -Tsvg > #{f}"
+      sh "railroady -ilamM | dot -T#{format} > #{f}"
     end
- 
-    desc 'Generates an abbreviated SVG class diagram for all models.'
+
+    desc 'Generates an abbreviated class diagram for all models.'
     task :brief do
-      f = @MODELS_BRIEF_SVG
+      f = @MODELS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilamM | dot -Tsvg > #{f}"
+      sh "railroady -bilamM | dot -T#{format} > #{f}"
     end
-    
+
   end
-  
+
   namespace :controllers do
- 
-    desc 'Generates an SVG class diagram for all controllers.'
+
+    desc 'Generates an class diagram for all controllers.'
     task :complete do
-      f = @CONTROLLERS_ALL_SVG
+      f = @CONTROLLERS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilC | neato -Tsvg > #{f}"
+      sh "railroady -ilC | neato -T#{format} > #{f}"
     end
- 
-    desc 'Generates an abbreviated SVG class diagram for all controllers.'
+
+    desc 'Generates an abbreviated class diagram for all controllers.'
     task :brief do
-      f = @CONTROLLERS_BRIEF_SVG
+      f = @CONTROLLERS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilC | neato -Tsvg > #{f}"
+      sh "railroady -bilC | neato -T#{format} > #{f}"
     end
- 
+
   end
- 
-  desc 'Generates all SVG class diagrams.'
+
+  desc 'Generates all class diagrams.'
   task :all => ['diagram:models:complete', 'diagram:models:brief', 'diagram:controllers:complete', 'diagram:controllers:brief']
- 
+
 end
