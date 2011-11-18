@@ -61,6 +61,8 @@ Common options:
 Models diagram options:
     -a, --all                        Include all models
                                        (not only ActiveRecord::Base derived)
+        --all-columns                Show all columns 
+                                       (not just content columns)
         --hide-magic                 Hide magic field names
         --hide-types                 Hide attributes type
     -j, --join                       Concentrate edges

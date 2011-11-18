@@ -20,6 +20,7 @@ class OptionsStruct < OpenStruct
                      :join => false,
                      :label => false,
                      :modules => false,
+                     :all_columns => false,
                      :hide_magic => false,
                      :hide_types => false,
                      :hide_public => false,
@@ -80,6 +81,9 @@ class OptionsStruct < OpenStruct
       end
       opts.on("--show-belongs_to", "Show belongs_to associations") do |s|
         self.show_belongs_to = s
+      end
+      opts.on("--all-columns", "Show all columns (not just content columns)") do |h|
+        self.all_columns = h
       end
       opts.on("--hide-magic", "Hide magic field names") do |h|
         self.hide_magic = h
