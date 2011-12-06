@@ -26,8 +26,8 @@ Ubuntu users can install in via `sudo apt-get install graphviz`.
 
 The easiest (and recommend) usage is to include railroady as a development dependency with your Rails 3 Gemfile, like so...
 
-    group :development, :test do
-	    gem 'railroady'
+    group :development, :test do 
+      gem 'railroady'
     end
 
 ...and then run the master rake task...
