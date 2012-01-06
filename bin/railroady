@@ -37,7 +37,11 @@ old_dir = Dir.pwd
 Dir.chdir(options.root) if options.root != ''
 
 if options.command == 'models'
-  diagram = ModelsDiagram.new options
+  if options.mongoid
+    diagram = MongoidDiagram.new options
+  else
+    diagram = ModelsDiagram.new options
+  end
 elsif options.command == 'controllers'
   diagram = ControllersDiagram.new options
 elsif options.command == 'aasm'

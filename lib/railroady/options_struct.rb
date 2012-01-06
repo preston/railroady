@@ -33,6 +33,7 @@ class OptionsStruct < OpenStruct
                      :verbose => false,
                      :xmi => false,
                      :command => '',
+                     :mongoid => false,
                      :app_name => 'railroady', :app_human_name => 'Railroady', :app_version =>'', :copyright =>'' }
     super(init_options.merge(args))
   end # initialize
@@ -103,6 +104,9 @@ class OptionsStruct < OpenStruct
       opts.on("-t", "--transitive", "Include transitive associations",
               "(through inheritance)") do |t|
         self.transitive = t
+      end
+      opts.on("-d", "--mongoid", "Mongoid orm") do |d|
+        self.mongoid = d
       end
       opts.separator ""
       opts.separator "Controllers diagram options:"
