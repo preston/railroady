@@ -1,6 +1,6 @@
 class MongoidDiagram < ModelsDiagram
 
-  attr_reader :magic_fields
+  attr_accessor :magic_fields
   attr_reader :internal_fields
 
   def initialize(options = {})
@@ -34,19 +34,23 @@ class MongoidDiagram < ModelsDiagram
         columns = current_class.fields.reject {|k,v| internal_fields.include?(k) }
 
         if @options.hide_magic 
-          magic_fields << current_class._types.first + "_count" if current_class.respond_to? '_types' 
-          #columns = current_class.content_columns.select {|c| ! magic_fields.include? c.name}
+          if current_class.respond_to?('_types')
+            current_class._types.each do |type_field|
+              magic_fields << type_field + "_count"
+            end
+          end
           columns = current_class.fields.reject {|k,v| magic_fields.include?(k) }
         end
 
         columns.each do |k,a|
           column = a.name
-          if a.options[:identity]
-            column_type = 'Id'
-          else
-            column_type = a.type.to_s.split('::').last
-            column_type = 'String' if column_type == 'Object'
-          end
+          column_type = if a.options[:identity]
+                          'Id'
+                        else
+                          a.type.to_s.split('::').last.tap do |type|
+                            type == 'Object' ? 'String' : type
+                          end
+                        end
 
           column += ' :' + column_type unless @options.hide_types
           node_attribs << column
@@ -108,7 +112,7 @@ class MongoidDiagram < ModelsDiagram
     end
     assoc_class_name.gsub!(%r{^::}, '')
 
-    if ['references_one', 'referenced_in', 'embeds_one','embedded_in'].include? assoc.macro.to_s
+    if ['references_one', 'referenced_in', 'embeds_one','embedded_in'].include?(assoc.macro.to_s)
       assoc_type = 'one-one'
     elsif ['references_many', 'embeds_many'].include?(assoc.macro.to_s) 
       assoc_type = 'one-many'
