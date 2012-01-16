@@ -70,6 +70,7 @@ Models diagram options:
     -p, --plugins-models             Include plugins models
     -t, --transitive                 Include transitive associations
                                      (through inheritance)
+    -d, --mongoid                    Mongoid Orm                 
 
 Controllers diagram options:
         --hide-public                Hide public methods
@@ -91,6 +92,8 @@ Other options:
 
     railroady -o models.dot -M 
       Produces a models diagram to the file 'models.dot'
+    railroady -d -o models.dot -M
+      Generate a mongoid models diagram to file 'models.dot'
     railroady -a -i -o full_models.dot -M 
       Models diagram with all classes showing inheritance relations
     railroady -M | dot -Tsvg > models.svg

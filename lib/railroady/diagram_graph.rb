@@ -108,13 +108,14 @@ class DiagramGraph
   # Build a DOT graph edge
   def dot_edge(type, from, to, name = '')
     options =  name != '' ? "label=\"#{name}\", " : ''
+    edge_color = '"#%02X%02X%02X"' % [rand(255), rand(255), rand(255)]
     case type
       when 'one-one'
-           options += 'arrowtail=odot, arrowhead=dot, dir=both'
+           options += "arrowtail=odot, arrowhead=dot, dir=both, color=#{edge_color}"
       when 'one-many'
-           options += 'arrowtail=odot, arrowhead=crow, dir=both'
+           options += "arrowtail=odot, arrowhead=crow, dir=both, color=#{edge_color}"
       when 'many-many'
-           options += 'arrowtail=crow, arrowhead=crow, dir=both'
+           options += "arrowtail=crow, arrowhead=crow, dir=both color=#{edge_color}"
       when 'is-a'
            options += 'arrowhead="none", arrowtail="onormal"'
       when 'event'
