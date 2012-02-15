@@ -7,22 +7,27 @@
 #
 # Author: Preston Lee, http://railroady.prestonlee.com 
 
-# Returns an absolute path for the following file.
-def format
-  @@DIAGRAM_FORMAT ||= 'svg'
-end
+# wrap helper methods so they don't conflict w/ methods on Object
+module RailRoady
+  class RakeHelpers
+    def self.format
+      @@DIAGRAM_FORMAT ||= 'svg'
+    end
 
-def full_path(name = 'test.txt')
-  f = File.join(Rails.root.to_s.gsub(' ', '\ '), 'doc', name)
-  f.to_s
+    # Returns an absolute path for the following file.
+    def self.full_path(name = 'test.txt')
+      f = File.join(Rails.root.to_s.gsub(' ', '\ '), 'doc', name)
+      f.to_s
+    end
+  end
 end
 
 namespace :diagram do
 
-  @MODELS_ALL = full_path("models_complete.#{format}").freeze
-  @MODELS_BRIEF = full_path("models_brief.#{format}").freeze
-  @CONTROLLERS_ALL = full_path("controllers_complete.#{format}").freeze
-  @CONTROLLERS_BRIEF = full_path("controllers_brief.#{format}").freeze
+  @MODELS_ALL = RailRoady::RakeHelpers.full_path("models_complete.#{RailRoady::RakeHelpers.format}").freeze
+  @MODELS_BRIEF = RailRoady::RakeHelpers.full_path("models_brief.#{RailRoady::RakeHelpers.format}").freeze
+  @CONTROLLERS_ALL = RailRoady::RakeHelpers.full_path("controllers_complete.#{RailRoady::RakeHelpers.format}").freeze
+  @CONTROLLERS_BRIEF = RailRoady::RakeHelpers.full_path("controllers_brief.#{RailRoady::RakeHelpers.format}").freeze
 
   namespace :models do
 
@@ -30,14 +35,14 @@ namespace :diagram do
     task :complete do
       f = @MODELS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilamM | dot -T#{format} > #{f}"
+      sh "railroady -ilamM | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all models.'
     task :brief do
       f = @MODELS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilamM | dot -T#{format} > #{f}"
+      sh "railroady -bilamM | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
   end
@@ -48,14 +53,14 @@ namespace :diagram do
     task :complete do
       f = @CONTROLLERS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilC | neato -T#{format} > #{f}"
+      sh "railroady -ilC | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all controllers.'
     task :brief do
       f = @CONTROLLERS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilC | neato -T#{format} > #{f}"
+      sh "railroady -bilC | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
   end
