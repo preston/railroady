@@ -250,6 +250,7 @@ class ModelsDiagram < AppDiagram
     else # habtm or has_many, :through
       # Add FAKE associations too in order to understand mistakes
       return if @habtm.include? [assoc_class_name, class_name, assoc_name]
+      return if assoc.options[:through] && ! @options.transitive
       assoc_type = 'many-many'
       @habtm << [class_name, assoc_class_name, assoc_name]
     end
