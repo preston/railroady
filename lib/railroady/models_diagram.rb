@@ -220,6 +220,10 @@ class ModelsDiagram < AppDiagram
     macro = assoc.macro.to_s
     return if %w[belongs_to referenced_in].include?(macro) && !@options.show_belongs_to
 
+    # Skip "through" associations
+    through = assoc.options.include?(:through)
+    return if through && @options.hide_through
+
     #TODO:
     # FAIL: assoc.methods.include?(:class_name)
     # FAIL: assoc.responds_to?(:class_name)

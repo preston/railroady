@@ -65,6 +65,7 @@ Models diagram options:
                                        (not just content columns)
         --hide-magic                 Hide magic field names
         --hide-types                 Hide attributes type
+        --hide-through               Hide through associations
     -j, --join                       Concentrate edges
     -m, --modules                    Include modules
     -p, --plugins-models             Include plugins models

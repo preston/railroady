@@ -29,6 +29,7 @@ class OptionsStruct < OpenStruct
                      :plugins_models => false,
                      :root => '',
                      :show_belongs_to => false,
+                     :hide_through => false,
                      :transitive => false,
                      :verbose => false,
                      :xmi => false,
@@ -81,6 +82,9 @@ class OptionsStruct < OpenStruct
       end
       opts.on("--show-belongs_to", "Show belongs_to associations") do |s|
         self.show_belongs_to = s
+      end
+      opts.on("--hide-through", "Hide through associations") do |h|
+        self.hide_through = h
       end
       opts.on("--all-columns", "Show all columns (not just content columns)") do |h|
         self.all_columns = h
