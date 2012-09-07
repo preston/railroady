@@ -29,20 +29,22 @@ namespace :diagram do
   @CONTROLLERS_ALL = RailRoady::RakeHelpers.full_path("controllers_complete.#{RailRoady::RakeHelpers.format}").freeze
   @CONTROLLERS_BRIEF = RailRoady::RakeHelpers.full_path("controllers_brief.#{RailRoady::RakeHelpers.format}").freeze
 
+  @SED = 'sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+
   namespace :models do
 
     desc 'Generates an class diagram for all models.'
     task :complete do
       f = @MODELS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilamM | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -ilamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all models.'
     task :brief do
       f = @MODELS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilamM | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -bilamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
   end
@@ -53,14 +55,14 @@ namespace :diagram do
     task :complete do
       f = @CONTROLLERS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilC | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -ilC | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all controllers.'
     task :brief do
       f = @CONTROLLERS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilC | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -bilC | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
   end
