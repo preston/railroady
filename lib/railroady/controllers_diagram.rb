@@ -87,7 +87,7 @@ class ControllersDiagram < AppDiagram
 
     # Generate the inheritance edge (only for ApplicationControllers)
     if @options.inheritance && 
-       (ApplicationController.subclasses.include? current_class.name)
+       (ApplicationController.subclasses.include? current_class)
       @graph.add_edge ['is-a', current_class.superclass.name, current_class.name]
     end
   end # process_class
