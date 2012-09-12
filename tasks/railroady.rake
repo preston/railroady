@@ -8,6 +8,9 @@
 # Author: Preston Lee, http://railroady.prestonlee.com 
 
 # wrap helper methods so they don't conflict w/ methods on Object
+
+require 'rbconfig'
+
 module RailRoady
   class RakeHelpers
     def self.format
@@ -19,6 +22,19 @@ module RailRoady
       f = File.join(Rails.root.to_s.gsub(' ', '\ '), 'doc', name)
       f.to_s
     end
+
+    def self.sed
+      regex = 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
+      case RbConfig::CONFIG['host_os']
+      when /linux|cygwin/
+        return "sed -r '#{regex}'"
+      when /mac|darwin|bsd/
+        return "sed -E '#{regex}'"
+      else
+        raise NotImplementedError
+      end
+    end
+
   end
 end
 
@@ -28,8 +44,7 @@ namespace :diagram do
   @MODELS_BRIEF = RailRoady::RakeHelpers.full_path("models_brief.#{RailRoady::RakeHelpers.format}").freeze
   @CONTROLLERS_ALL = RailRoady::RakeHelpers.full_path("controllers_complete.#{RailRoady::RakeHelpers.format}").freeze
   @CONTROLLERS_BRIEF = RailRoady::RakeHelpers.full_path("controllers_brief.#{RailRoady::RakeHelpers.format}").freeze
-
-  @SED = 'sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+  @SED = RailRoady::RakeHelpers.sed
 
   namespace :models do
 
