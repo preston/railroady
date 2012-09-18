@@ -40,7 +40,9 @@ class ModelsDiagram < AppDiagram
     STDERR.puts "Processing #{current_class}" if @options.verbose
 
     generated =
-      if defined?(Mongoid::Document) && current_class.new.is_a?(Mongoid::Document)
+      if defined?(CouchRest::Model::Base) && current_class.new.is_a?(CouchRest::Model::Base)
+        process_couchrest_model(current_class)
+      elsif defined?(Mongoid::Document) && current_class.new.is_a?(Mongoid::Document)
         process_mongoid_model(current_class)
       elsif defined?(DataMapper::Resource) && current_class.new.is_a?(DataMapper::Resource)
         process_datamapper_model(current_class)
@@ -59,7 +61,9 @@ class ModelsDiagram < AppDiagram
   end # process_class
 
   def include_inheritance?(current_class)
-    (defined?(ActiveRecord::Base) && current_class.superclass != ActiveRecord::Base) &&
+    STDERR.puts current_class.superclass if @options.verbose
+    (defined?(ActiveRecord::Base) && current_class.superclass != ActiveRecord::Base) ||
+    (defined?(CouchRest::Model::Base) && current_class.superclass != CouchRest::Model::Base) &&
     (current_class.superclass != Object)
   end
 
@@ -82,15 +86,15 @@ class ModelsDiagram < AppDiagram
       node_type = 'model'
 
       # Collect model's content columns
-    	#content_columns = current_class.content_columns
+      #content_columns = current_class.content_columns
 
-    	if @options.hide_magic
+      if @options.hide_magic
         # From patch #13351
         # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
         magic_fields = [
-        "created_at", "created_on", "updated_at", "updated_on",
-        "lock_version", "type", "id", "position", "parent_id", "lft",
-        "rgt", "quote", "template"
+          "created_at", "created_on", "updated_at", "updated_on",
+          "lock_version", "type", "id", "position", "parent_id", "lft",
+          "rgt", "quote", "template"
         ]
         magic_fields << current_class.table_name + "_count" if current_class.respond_to? 'table_name'
         content_columns = current_class.content_columns.select {|c| ! magic_fields.include? c.name}
@@ -162,9 +166,6 @@ class ModelsDiagram < AppDiagram
     true
   end
 
-
-
-
   def process_mongoid_model(current_class)
     node_attribs = []
 
@@ -174,15 +175,15 @@ class ModelsDiagram < AppDiagram
       node_type = 'model'
 
       # Collect model's content columns
-    	content_columns = current_class.fields.values.sort_by(&:name)
+      content_columns = current_class.fields.values.sort_by(&:name)
 
-    	if @options.hide_magic
+      if @options.hide_magic
         # From patch #13351
         # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
         magic_fields = [
-        "created_at", "created_on", "updated_at", "updated_on",
-        "lock_version", "_type", "_id", "position", "parent_id", "lft",
-        "rgt", "quote", "template"
+          "created_at", "created_on", "updated_at", "updated_on",
+          "lock_version", "_type", "_id", "position", "parent_id", "lft",
+          "rgt", "quote", "template"
         ]
         content_columns = content_columns.select {|c| !magic_fields.include?(c.name) }
       end
@@ -200,7 +201,7 @@ class ModelsDiagram < AppDiagram
     associations = current_class.relations.values
 
     if @options.inheritance && !@options.transitive &&
-       current_class.superclass.respond_to?(:relations)
+      current_class.superclass.respond_to?(:relations)
       associations -= current_class.superclass.relations.values
     end
 
@@ -211,6 +212,42 @@ class ModelsDiagram < AppDiagram
     true
   end
 
+  ##
+  # Some very basic CouchRest::Model support
+  #
+  # Field types note: the field's type is rendered only if it's explicitly
+  # specified in a model.
+  #
+  def process_couchrest_model(current_class)
+    node_attribs = []
+
+    if @options.brief
+      node_type = 'model-brief'
+    else
+      node_type = 'model'
+
+      # Collect model's content columns
+      content_columns = current_class.properties
+
+      if @options.hide_magic
+        magic_fields = [
+          "created_at", "updated_at",
+          "type", "_id", "_rev"
+        ]
+        content_columns = content_columns.select {|c| !magic_fields.include?(c.name) }
+      end
+
+      content_columns.each do |a|
+        content_column = a.name
+        content_column += " :#{a.type}" unless @options.hide_types || a.type.nil?
+        node_attribs << content_column
+      end
+    end
+
+    @graph.add_node [node_type, current_class.name, node_attribs]
+
+    true
+  end
 
   # Process a model association
   def process_association(class_name, assoc)
@@ -261,7 +298,6 @@ class ModelsDiagram < AppDiagram
     # @graph.add_edge [assoc_type, class_name, assoc.class_name, assoc_name]
     @graph.add_edge [assoc_type, class_name, assoc_class_name, assoc_name]
   end # process_association
-end # class ModelsDiagram
 
   # Process a DataMapper relationship
   def process_datamapper_relationship(class_name, relation)
@@ -298,3 +334,7 @@ end # class ModelsDiagram
 
     @graph.add_edge [rel_type, class_name, assoc_class_name, assoc_name ]
   end
+
+end # class ModelsDiagram
+
+
