@@ -85,11 +85,14 @@ class ControllersDiagram < AppDiagram
       @graph.add_node ['module', current_class.name]
     end
 
-    # Generate the inheritance edge (only for ApplicationControllers)
-    if @options.inheritance && 
-       (ApplicationController.subclasses.include? current_class)
+    # Generate the inheritance edge (only for transitive subclasses of ApplicationControllers)
+    if @options.inheritance && (transitive_subclasses_of(ApplicationController).include? current_class)
       @graph.add_edge ['is-a', current_class.superclass.name, current_class.name]
     end
   end # process_class
+
+  def transitive_subclasses_of(klass)
+    klass.subclasses | klass.subclasses.map {|subklass| transitive_subclasses_of(subklass)}.flatten
+  end
 
 end # class ControllersDiagram
