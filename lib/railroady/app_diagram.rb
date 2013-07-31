@@ -52,7 +52,7 @@ class AppDiagram
     STDERR.print "Loading application environment\n" if @options.verbose
     begin
       disable_stdout
-      l = File.join(Dir.pwd.to_s, 'config/environment')
+      l = File.join(Dir.pwd.to_s, @options.config_file)
       require l
       enable_stdout
     rescue LoadError

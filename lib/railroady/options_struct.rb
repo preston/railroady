@@ -34,6 +34,7 @@ class OptionsStruct < OpenStruct
                      :verbose => false,
                      :xmi => false,
                      :command => '',
+                     :config_file => 'config/environment',
                      :app_name => 'railroady', :app_human_name => 'Railroady', :app_version =>'', :copyright =>'' }
     super(init_options.merge(args))
   end # initialize
@@ -132,6 +133,11 @@ class OptionsStruct < OpenStruct
         exit
       end
       opts.separator ""
+      opts.on("-c", "--config FILE", "File to load environment (defaults to config/environment)") do |c|
+        if c && c != ''
+          self.config_file = c
+        end
+      end
       opts.separator "Commands (you must supply one of these):"
       opts.on("-M", "--models", "Generate models diagram") do |c|
         if self.command != ''
