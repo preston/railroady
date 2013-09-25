@@ -15,13 +15,19 @@ You MUST have the the following utilities available at the command line.
 
 = Mac users
 
-MacPorts users can install in via `sudo port install graphviz`.
-Brew user can install via `brew install graphviz`.
+MacPorts users can install in via 
+
+    sudo port install graphviz
+    
+Brew user can install via
+
+    brew install graphviz
 
 = Ubuntu users
 
-Ubuntu users can install in via `sudo apt-get install graphviz`.
+Ubuntu users can install in via 
 
+    sudo apt-get install graphviz
 = Usage
 
 The easiest (and recommend) usage is to include railroady as a development dependency with your Rails 3 Gemfile, like so...
