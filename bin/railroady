@@ -36,11 +36,12 @@ old_dir = Dir.pwd
 
 Dir.chdir(options.root) if options.root != ''
 
-if options.command == 'models'
+case options.command
+when 'models'
   diagram = ModelsDiagram.new options
-elsif options.command == 'controllers'
+when 'controllers'
   diagram = ControllersDiagram.new options
-elsif options.command == 'aasm'
+when 'aasm'
   diagram = AasmDiagram.new(options)
 else
   STDERR.print "#{APP_HUMAN_NAME} v#{APP_VERSION}\n" +
