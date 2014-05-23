@@ -45,5 +45,14 @@ describe ModelsDiagram do
       files.size.must_equal 1
     end
 
+    it "should include engine files" do
+      options = OptionsStruct.new(:engine_models => true)
+      md = ModelsDiagram.new(options)
+      engines = [OpenStruct.new(:root => "test/file_fixture/lib")]
+      md.stub(:engines, engines) do
+        md.get_files.must_include("test/file_fixture/lib/app/models/dummy1.rb")
+      end
+    end
+    
   end
 end

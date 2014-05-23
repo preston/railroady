@@ -39,10 +39,22 @@ class ControllersDiagram < AppDiagram
 
   def get_files(prefix ='')
     files = !@options.specify.empty? ? Dir.glob(@options.specify) : Dir.glob(prefix << "app/controllers/**/*_controller.rb")
+    files += get_engine_files if @options.engine_controllers
     files -= Dir.glob(@options.exclude)
     files
   end
+  
+  def get_engine_files
+    engines.collect { |engine| Dir.glob("#{engine.root.to_s}/app/controllers/**/*_controller.rb")}.flatten
+  end
+  
+  def extract_class_name(filename)
+    controller_index = filename.split('/').index("controllers") + 1
+    filename.split('/')[controller_index..-1].collect { |i| i.camelize }.join('::').chomp(".rb")
+  end
 
+
+  
   private
   # Load controller classes
   def load_classes

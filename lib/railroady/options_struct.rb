@@ -27,6 +27,8 @@ class OptionsStruct < OpenStruct
                      :hide_protected => false,
                      :hide_private => false,
                      :plugins_models => false,
+                     :engine_models => false,
+                     :engine_controllers => false, 
                      :root => '',
                      :show_belongs_to => false,
                      :hide_through => false,
@@ -109,6 +111,10 @@ class OptionsStruct < OpenStruct
       opts.on("-p", "--plugins-models", "Include plugins models") do |p|
         self.plugins_models = p
       end
+      opts.on("-z", "--engine-models", "Include engine models") do |em|
+        self.engine_models = em
+      end
+      
       opts.on("-t", "--transitive", "Include transitive associations",
               "(through inheritance)") do |t|
         self.transitive = t
@@ -124,6 +130,10 @@ class OptionsStruct < OpenStruct
       opts.on("--hide-private", "Hide private methods") do |h|
         self.hide_private = h
       end
+      opts.on("--engine-controllers", "Include engine controllers") do |ec|
+        self.engine_controllers = ec
+      end
+
       opts.separator ""
       opts.separator "Other options:"
       opts.on("-h", "--help", "Show this message") do

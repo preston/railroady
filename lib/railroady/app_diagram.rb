@@ -46,6 +46,20 @@ class AppDiagram
     load_environment
   end
 
+  def engines
+    engines = []
+
+    if defined?(Rails)
+      engines = if Rails::Application::Railties.respond_to?(:engines)
+        Rails::Application::Railties.engines
+      else
+        Rails::Engine.subclasses.map(&:instance)
+      end
+    end
+
+    engines
+  end
+
   private 
   
   # Load Rails application's environment

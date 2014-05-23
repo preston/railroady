@@ -45,5 +45,15 @@ describe ControllersDiagram do
       files.size.must_equal 1
     end
 
+    it "should include engine files" do
+      options = OptionsStruct.new(:engine_controllers => true)
+      md = ControllersDiagram.new(options)
+      engines = [OpenStruct.new(:root => "test/file_fixture/lib")]
+      md.stub(:engines, engines) do
+        md.get_files.must_include("test/file_fixture/lib/app/controllers/dummy/dummy_controller.rb")
+      end
+    end
+    
+
   end
 end

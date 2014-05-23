@@ -42,6 +42,12 @@ The easiest (and recommend) usage is to include railroady as a development depen
 
 This should generate four doc/*.svg files that can be opened in (most) web browsers as well as dedicated document viewers supporting the Scalable Vector Graphics format.
 
+= Support for Engines
+
+Generate diagram for models and controllers including those in the engines.
+
+    rake diagram:all_with_engines 
+
 = Alternate Usage
 
 Alternatively, you may run the 'railroady' command-line program at the Rails application's root directory. You can redirect its output to a .dot file or pipe it to the dot or neato utilities to produce a graphic. Model diagrams are intended to be processed using dot and controller diagrams are best processed using neato.
@@ -76,6 +82,7 @@ Models diagram options:
     -j, --join                       Concentrate edges
     -m, --modules                    Include modules
     -p, --plugins-models             Include plugins models
+    -z, --engine-models              Include engine models
     -t, --transitive                 Include transitive associations
                                      (through inheritance)
 
@@ -83,7 +90,7 @@ Controllers diagram options:
         --hide-public                Hide public methods
         --hide-protected             Hide protected methods
         --hide-private               Hide private methods
-
+        --engine-controllers         Show engine controllers    
 Other options:
     -h, --help                       Show this message
         --version                    Show version and copyright
