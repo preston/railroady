@@ -32,6 +32,7 @@ class OptionsStruct < OpenStruct
                      :hide_through => false,
                      :transitive => false,
                      :verbose => false,
+                     :alphabetize => false,
                      :xmi => false,
                      :command => '',
                      :config_file => 'config/environment',
@@ -74,6 +75,9 @@ class OptionsStruct < OpenStruct
       opts.on("-x", "--xmi", "Produce XMI instead of DOT", 
               "  (for UML tools)") do |x|
         self.xmi = x
+      end
+      opts.on("--alphabetize", "Sort methods alphabetically") do |a|
+        self.alphabetize = a
       end
       opts.separator ""
       opts.separator "Models diagram options:"

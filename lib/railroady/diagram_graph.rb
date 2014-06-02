@@ -10,7 +10,8 @@ class DiagramGraph
 
   def initialize
     @diagram_type = ''
-    @show_label = false
+    @show_label   = false
+    @alphabetize  = false
     @nodes = []
     @edges = []
   end
@@ -29,6 +30,10 @@ class DiagramGraph
 
   def show_label= (value)
     @show_label = value
+  end
+
+  def alphabetize= (flag)
+    @alphabetize = flag
   end
 
 
@@ -78,7 +83,7 @@ class DiagramGraph
     case type
       when 'model'
            options = 'shape=Mrecord, label="{' + name + '|'
-           options += attributes.join('\l')
+           options += attributes.sort_by { |s| @alphabetize ? s : nil }.join('\l')
            options += '\l}"'
       when 'model-brief'
            options = ''
@@ -88,9 +93,9 @@ class DiagramGraph
            options = 'shape=box'
       when 'controller'
            options = 'shape=Mrecord, label="{' + name + '|'
-           public_methods    = attributes[:public].join('\l')
-           protected_methods = attributes[:protected].join('\l')
-           private_methods   = attributes[:private].join('\l')
+           public_methods    = attributes[:public].sort_by    { |s| @alphabetize ? s : nil }.join('\l')
+           protected_methods = attributes[:protected].sort_by { |s| @alphabetize ? s : nil }.join('\l')
+           private_methods   = attributes[:private].sort_by   { |s| @alphabetize ? s : nil }.join('\l')
            options += public_methods + '\l|' + protected_methods + '\l|' +
                       private_methods + '\l'
            options += '}"'

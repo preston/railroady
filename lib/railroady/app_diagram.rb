@@ -13,6 +13,7 @@ class AppDiagram
     @options = options
     @graph = DiagramGraph.new
     @graph.show_label = @options.label
+    @graph.alphabetize = @options.alphabetize
   end
   
 
