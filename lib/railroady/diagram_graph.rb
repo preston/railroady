@@ -51,6 +51,11 @@ class DiagramGraph
      return ""
   end
 
+  # Convert to a valid DOT identifier
+  def self.dotify(class_name)
+    class_name.gsub(/::/, '__').downcase
+  end
+
   private
 
   # Build DOT diagram header
@@ -105,7 +110,7 @@ class DiagramGraph
            options = 'shape=box, style=dotted, label="' + name + '"'
       when 'aasm'
            # Return subgraph format
-           return "subgraph cluster_#{name.downcase} {\n\tlabel = #{quote(name)}\n\t#{attributes.join("\n  ")}}"
+           return "subgraph cluster_#{DiagramGraph.dotify(name)} {\n\tlabel = #{quote(name)}\n\t#{attributes.join("\n  ")}}"
     end # case
     return "\t#{quote(name)} [#{options}]\n"
   end # dot_node
