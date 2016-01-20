@@ -127,6 +127,21 @@ class ModelsDiagram < AppDiagram
       else
         content_columns = current_class.columns
       end
+      
+      if @options.show_only_accessible_attributes
+        # pre-filter with accessible_attributes
+        aa_set = Set.new(current_class.accessible_attributes)
+        content_columns = content_columns.select { |c| aa_set.include?(c.name) } 
+
+        if @options.hide_inherited_attributes 
+          sc = current_class.superclass
+          while sc!=nil && sc != ActiveRecord::Base
+            sc_aa_set = Set.new(sc.accessible_attributes)
+            content_columns = content_columns.select { |c| !sc_aa_set.include?(c.name) } 
+            sc = sc.superclass
+          end
+        end
+      end
 
       content_columns.each do |a|
         content_column = a.name
