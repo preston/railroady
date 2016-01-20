@@ -25,6 +25,8 @@ class OptionsStruct < OpenStruct
                      hide_public: false,
                      hide_protected: false,
                      hide_private: false,
+                     show_only_accessible_attributes: false,
+                     hide_inherited_attributes: false,
                      plugins_models: false,
                      engine_models: false,
                      engine_controllers: false,
@@ -101,6 +103,12 @@ class OptionsStruct < OpenStruct
       end
       opts.on('--hide-types', 'Hide attributes type') do |h|
         self.hide_types = h
+      end
+      opts.on('--show-only-accessible-attributes', 'Show only columns which are accessible attributes') do |h|
+        self.show_only_accessible_attributes = h
+      end
+      opts.on('--hide-inherited-attributes', 'Hide attributes defined in superclasses (use with --show-only-accessible-attributes)') do |h|
+        self.hide_inherited_attributes = h
       end
       opts.on('-j', '--join', 'Concentrate edges') do |j|
         self.join = j

@@ -79,6 +79,9 @@ Models diagram options:
         --hide-magic                 Hide magic field names
         --hide-types                 Hide attributes type
         --hide-through               Hide through associations
+        --show-only-accessible-attributes
+                                     Show only columns which are accessible attributes
+        --hide-inherited-attributes  Hide attributes defined in superclasses (use with --show-only-accessible-attributes)
     -j, --join                       Concentrate edges
     -m, --modules                    Include modules
     -p, --plugins-models             Include plugins models
