@@ -61,15 +61,16 @@ class AasmDiagram < AppDiagram
     node_type = 'aasm'
 
     STDERR.print "\t\tprocessing as acts_as_state_machine\n" if @options.verbose
-    current_class.states.each do |state_name|
+    current_class.aasm.states.each do |state_name|
     #   state = current_class.read_inheritable_attribute(:states)[state_name]
-      node_shape = (current_class.initial_state == state_name) ? ', peripheries = 2' : ''
+      node_shape = (current_class.aasm.initial_state == state_name) ? ', peripheries = 2' : ''
       node_attribs << "#{current_class.name.downcase}_#{state_name} [label=#{state_name} #{node_shape}];"
     end
     @graph.add_node [node_type, current_class.name, node_attribs]
 
-    current_class.read_inheritable_attribute(:transition_table).each do |event_name, event|
-      event.each do |transition|
+    current_class.aasm.events.each do |event|
+      event_name = event.name
+      event.transitions.each do |transition|
         @graph.add_edge [
           'event',
           current_class.name.downcase + '_' + transition.from.to_s,
