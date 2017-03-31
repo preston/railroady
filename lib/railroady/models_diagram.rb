@@ -285,6 +285,9 @@ class ModelsDiagram < AppDiagram
     assoc_class_name = assoc.class_name rescue nil
     assoc_class_name ||= assoc.name.to_s.underscore.singularize.camelize
 
+    # hide skipped classes
+    return if @options.excluded_classes.include?(assoc_class_name)
+
     # Only non standard association names needs a label
 
     # from patch #12384
