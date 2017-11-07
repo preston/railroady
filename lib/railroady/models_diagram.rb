@@ -282,7 +282,7 @@ class ModelsDiagram < AppDiagram
     # TODO:
     # FAIL: assoc.methods.include?(:class_name)
     # FAIL: assoc.responds_to?(:class_name)
-    assoc_class_name = assoc.class_name rescue nil
+    assoc_class_name = assoc.class_name.dup rescue nil
     assoc_class_name ||= assoc.name.to_s.underscore.singularize.camelize
 
     # Only non standard association names needs a label
