@@ -95,7 +95,7 @@ class DiagramGraph
         options = 'shape=box, style=dotted, label="' + name + '"'
       when 'aasm'
         # Return subgraph format
-        return "subgraph cluster_#{name.downcase} {\n\tlabel = #{quote(name)}\n\t#{attributes.join("\n  ")}}"
+        return "subgraph cluster_#{name.downcase.gsub(/[^a-z0-9\-_]+/i, '_')} {\n\tlabel = #{quote(name)}\n\t#{attributes.join("\n  ")}}"
     end # case
     options = [options, custom_options].compact.reject{|o| o.empty?}.join(', ')
     return "\t#{quote(name)} [#{options}]\n"
