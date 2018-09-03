@@ -31,7 +31,7 @@ module RailRoady
       when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
         return "sed -r \"#{regex}\""
       when /mac|darwin|bsd/
-        return "sed -E '#{regex}'"
+        return "sed -E '#{regex}' | sed -E 's/D,.*//g'"     #filter debug info
       else
         fail NotImplementedError
       end
