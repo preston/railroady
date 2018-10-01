@@ -61,29 +61,29 @@ namespace :diagram do
     task :complete do
       f = @MODELS_ALL
       puts "Generating #{f}"
-      puts "railroady -lamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
-      sh "railroady -lamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      puts "railroady -lamM | #{@SED} > a.txt | tee a.txt| dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -lamM | #{@SED} > a.txt | tee a.txt | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all models.'
     task :brief do
       f = @MODELS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -blamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -blamM | #{@SED} > a.txt | tee a.txt| dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates a class diagram for all models including those in engines'
     task :complete_with_engines do
       f = @MODELS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilamzM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -ilamzM | #{@SED} > a.txt | tee a.txt| dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all models including those in engines'
     task :brief_with_engines do
       f = @MODELS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilamzM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -bilamzM | #{@SED} > a.txt | tee a.txt| dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
   end
 
@@ -95,28 +95,28 @@ namespace :diagram do
     task :complete do
       f = @CONTROLLERS_ALL
       puts "Generating #{f}"
-      sh "railroady -lC | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -lC | #{@SED}  > a.txt | tee a.txt| neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all controllers.'
     task :brief do
       f = @CONTROLLERS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -blC | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -blC | #{@SED} > a.txt | tee a.txt| neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates a class diagram for all controllers including those in engines'
     task :complete_with_engines do
       f = @CONTROLLERS_ALL
       puts "Generating #{f}"
-      sh "railroady -ilC --engine-controllers | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -ilC --engine-controllers > a.txt | tee a.txt| #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
     desc 'Generates an abbreviated class diagram for all controllers including those in engines.'
     task :brief_with_engines do
       f = @CONTROLLERS_BRIEF
       puts "Generating #{f}"
-      sh "railroady -bilC --engine-controllers | #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
+      sh "railroady -bilC --engine-controllers > a.txt | tee a.txt| #{@SED} | neato -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
   end
 
