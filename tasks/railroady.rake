@@ -61,6 +61,7 @@ namespace :diagram do
     task :complete do
       f = @MODELS_ALL
       puts "Generating #{f}"
+      puts "railroady -lamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
       sh "railroady -lamM | #{@SED} | dot -T#{RailRoady::RakeHelpers.format} > #{f}"
     end
 
