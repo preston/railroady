@@ -119,7 +119,7 @@ class DiagramGraph
       when 'is-a'
         options += 'arrowhead="none", arrowtail="onormal"'
       when 'event'
-        options += 'fontsize=10,color="dodgerblue4"'
+        options += 'fontsize=10,color="brown3"'
     end
     "\t#{quote(from)} -> #{quote(to)} [#{options}]\n"
   end # dot_edge
