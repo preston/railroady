@@ -272,7 +272,7 @@ class ModelsDiagram < AppDiagram
     STDERR.puts "- Processing model association #{assoc.name}" if @options.verbose
 
     # Skip "belongs_to" associations
-    macro = assoc.macro.to_s
+    macro = assoc.try(:macro).try(:to_s) || assoc.class.name.split('::').last.underscore.to_s
     return if %w(belongs_to referenced_in).include?(macro) && !@options.show_belongs_to
 
     # Skip "through" associations
