@@ -20,7 +20,7 @@ class ControllersDiagram < AppDiagram
 
   # Process controller files
   def generate
-    STDERR.print "Generating controllers diagram\n" if @options.verbose
+    $stderr.print "Generating controllers diagram\n" if @options.verbose
     files = get_files
     # only add APP_CONTROLLER if it isn't already included from the glob above
     files << APP_CONTROLLER unless files.include? APP_CONTROLLER
@@ -31,10 +31,10 @@ class ControllersDiagram < AppDiagram
       begin
         process_class class_name.constantize
       rescue Exception
-        STDERR.print "Warning: exception #{$ERROR_INFO} raised while trying to load controller class #{f}"
+        $stderr.print "Warning: exception #{$ERROR_INFO} raised while trying to load controller class #{f}"
       end
     end
-  end # generate
+  end
 
   def get_files(prefix = '')
     files = !@options.specify.empty? ? Dir.glob(@options.specify) : Dir.glob(prefix << 'app/controllers/**/*_controller.rb')
@@ -48,7 +48,7 @@ class ControllersDiagram < AppDiagram
   end
 
   def extract_class_name(filename)
-    filename.match(/.*\/controllers\/(.*).rb$/)[1].camelize
+    filename.match(%r{.*/controllers/(.*).rb$})[1].camelize
   end
 
   private
@@ -64,11 +64,11 @@ class ControllersDiagram < AppDiagram
     enable_stdout
     print_error 'controller classes'
     raise
-  end # load_classes
+  end
 
   # Proccess a controller class
   def process_class(current_class)
-    STDERR.print "\tProcessing #{current_class}\n" if @options.verbose
+    $stderr.print "\tProcessing #{current_class}\n" if @options.verbose
 
     if @options.brief
       @graph.add_node ['controller-brief', current_class.name]
@@ -77,15 +77,21 @@ class ControllersDiagram < AppDiagram
       node_attribs = { public: [],
                        protected: [],
                        private: [] }
-      current_class.public_instance_methods(false).sort.each do |m|
-        node_attribs[:public] << m
-      end unless @options.hide_public
-      current_class.protected_instance_methods(false).sort.each do |m|
-        node_attribs[:protected] << m
-      end unless @options.hide_protected
-      current_class.private_instance_methods(false).sort.each do |m|
-        node_attribs[:private] << m
-      end unless @options.hide_private
+      unless @options.hide_public
+        current_class.public_instance_methods(false).sort.each do |m|
+          node_attribs[:public] << m
+        end
+      end
+      unless @options.hide_protected
+        current_class.protected_instance_methods(false).sort.each do |m|
+          node_attribs[:protected] << m
+        end
+      end
+      unless @options.hide_private
+        current_class.private_instance_methods(false).sort.each do |m|
+          node_attribs[:private] << m
+        end
+      end
       @graph.add_node ['controller', current_class.name, node_attribs]
     elsif @options.modules && current_class.is_a?(Module)
       @graph.add_node ['module', current_class.name]
@@ -95,9 +101,9 @@ class ControllersDiagram < AppDiagram
     if @options.inheritance && (transitive_subclasses_of(ApplicationController).include? current_class)
       @graph.add_edge ['is-a', current_class.superclass.name, current_class.name]
     end
-  end # process_class
+  end
 
   def transitive_subclasses_of(klass)
     klass.subclasses | klass.subclasses.map { |subklass| transitive_subclasses_of(subklass) }.flatten
   end
-end # class ControllersDiagram
+end

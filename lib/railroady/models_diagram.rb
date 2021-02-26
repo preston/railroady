@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # RailRoady - RoR diagrams generator
 # http://railroad.rubyforge.org
 #
@@ -17,20 +19,20 @@ class ModelsDiagram < AppDiagram
 
   # Process model files
   def generate
-    STDERR.puts 'Generating models diagram' if @options.verbose
+    warn 'Generating models diagram' if @options.verbose
     get_files.each do |f|
       begin
         process_class extract_class_name(f).constantize
-      rescue Exception
-        STDERR.puts "Warning: exception #{$ERROR_INFO} raised while trying to load model class #{f}"
+      rescue NoMethodError
+        warn "Warning: exception #{$ERROR_INFO} raised while trying to load model class #{f}"
       end
     end
   end
 
   def get_files(prefix = '')
-    files = !@options.specify.empty? ? Dir.glob(@options.specify) : Dir.glob(prefix + 'app/models/**/*.rb')
+    files = !@options.specify.empty? ? Dir.glob(@options.specify) : Dir.glob("#{prefix}app/models/**/*.rb")
     files += Dir.glob('vendor/plugins/**/app/models/*.rb') if @options.plugins_models
-    files -= Dir.glob(prefix + 'app/models/concerns/**/*.rb') unless @options.include_concerns
+    files -= Dir.glob("#{prefix}app/models/concerns/**/*.rb") unless @options.include_concerns
     files += engine_files if @options.engine_models
     files -= Dir.glob(@options.exclude)
     files
@@ -41,17 +43,19 @@ class ModelsDiagram < AppDiagram
   end
 
   def extract_class_name(filename)
-    filename_was, class_name = filename, nil
+    filename_was = filename
+    class_name = nil
 
     filename = "app/models/#{filename.split('app/models')[1]}"
 
     while filename.split('/').length > 2
       begin
-        class_name = filename.match(/.*\/models\/(.*).rb$/)[1].camelize
+        class_name = filename.match(%r{.*/models/(.*).rb$})[1]
+        class_name = class_name.camelize
+        # class_name = class_name.from 2 if class_name.start_with? '::'
         class_name.constantize
-
         break
-      rescue Exception
+      rescue NoMethodError
         class_name = nil
         filename_end = filename.split('/')[2..-1]
         filename_end.shift
@@ -60,15 +64,16 @@ class ModelsDiagram < AppDiagram
     end
 
     if class_name.nil?
-      filename_was.match(/.*\/models\/(.*).rb$/)[1].camelize
+      filename_was.match(%r{.*/models/(.*).rb$})[1].camelize
     else
+      warn class_name
       class_name
     end
   end
 
   # Process a model class
   def process_class(current_class)
-    STDERR.puts "Processing #{current_class}" if @options.verbose
+    warn "Processing #{current_class}" if @options.verbose
 
     generated =
       if defined?(CouchRest::Model::Base) && current_class.new.is_a?(CouchRest::Model::Base)
@@ -85,13 +90,14 @@ class ModelsDiagram < AppDiagram
         process_basic_module(current_class)
       end
 
+    warn generated
     if @options.inheritance && generated && include_inheritance?(current_class)
       @graph.add_edge ['is-a', current_class.superclass.name, current_class.name]
     end
-  end # process_class
+  end
 
   def include_inheritance?(current_class)
-    STDERR.puts current_class.superclass if @options.verbose
+    warn current_class.superclass if @options.verbose
     (defined?(ActiveRecord::Base) ? current_class.superclass != ActiveRecord::Base : true) &&
       (defined?(CouchRest::Model::Base) ? current_class.superclass != CouchRest::Model::Base : true) &&
       (current_class.superclass != Object)
@@ -121,16 +127,16 @@ class ModelsDiagram < AppDiagram
       if @options.hide_magic
         # From patch #13351
         # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
-        magic_fields = %w(created_at created_on updated_at updated_on lock_version type id position parent_id lft rgt quote template)
-        magic_fields << current_class.table_name + '_count' if current_class.respond_to? 'table_name'
-        content_columns = current_class.content_columns.select { |c| !magic_fields.include? c.name }
+        magic_fields = %w[created_at created_on updated_at updated_on lock_version type id position parent_id lft rgt quote template]
+        magic_fields << "#{current_class.table_name}_count" if current_class.respond_to? 'table_name'
+        content_columns = current_class.content_columns.reject { |c| magic_fields.include? c.name }
       else
         content_columns = current_class.columns
       end
 
       content_columns.each do |a|
         content_column = a.name
-        content_column += ' :' + a.sql_type.to_s unless @options.hide_types
+        content_column += " :#{a.sql_type.to_s}" unless @options.hide_types
         node_attribs << content_column
       end
     end
@@ -141,7 +147,7 @@ class ModelsDiagram < AppDiagram
     if @options.inheritance && ! @options.transitive
       superclass_associations = current_class.superclass.reflect_on_all_associations
 
-      associations = associations.select { |a| !superclass_associations.include? a }
+      associations = associations.reject { |a| superclass_associations.include? a }
       # This doesn't works!
       # associations -= current_class.superclass.reflect_on_all_associations
     end
@@ -167,13 +173,13 @@ class ModelsDiagram < AppDiagram
         # From patch #13351
         # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
         magic_fields =
-          %w(created_at created_on updated_at updated_on lock_version _type _id position parent_id lft rgt quote template)
-        props = props.select { |c| !magic_fields.include?(c.name.to_s) }
+          %w[created_at created_on updated_at updated_on lock_version _type _id position parent_id lft rgt quote template]
+        props = props.reject { |c| magic_fields.include?(c.name.to_s) }
       end
 
       props.each do |a|
         prop = a.name.to_s
-        prop += ' :' + a.class.name.split('::').last unless @options.hide_types
+        prop += " :#{a.class.name.split('::').last}" unless @options.hide_types
         node_attribs << prop
       end
     end
@@ -205,8 +211,8 @@ class ModelsDiagram < AppDiagram
       if @options.hide_magic
         # From patch #13351
         # http://wiki.rubyonrails.org/rails/pages/MagicFieldNames
-        magic_fields = %w(created_at created_on updated_at updated_on lock_version _type _id position parent_id lft rgt quote template)
-        content_columns = content_columns.select { |c| !magic_fields.include?(c.name) }
+        magic_fields = %w[created_at created_on updated_at updated_on lock_version _type _id position parent_id lft rgt quote template]
+        content_columns = content_columns.reject { |c| magic_fields.include?(c.name) }
       end
 
       content_columns.each do |a|
@@ -251,8 +257,8 @@ class ModelsDiagram < AppDiagram
       content_columns = current_class.properties
 
       if @options.hide_magic
-        magic_fields = %w(created_at updated_at type _id _rev)
-        content_columns = content_columns.select { |c| !magic_fields.include?(c.name) }
+        magic_fields = %w[created_at updated_at type _id _rev]
+        content_columns = content_columns.reject { |c| magic_fields.include?(c.name) }
       end
 
       content_columns.each do |a|
@@ -269,11 +275,10 @@ class ModelsDiagram < AppDiagram
 
   # Process a model association
   def process_association(class_name, assoc)
-    STDERR.puts "- Processing model association #{assoc.name}" if @options.verbose
-
+    warn "- Processing model association #{assoc.name}" if @options.verbose
     # Skip "belongs_to" associations
-    macro = assoc.macro.to_s
-    return if %w(belongs_to referenced_in).include?(macro) && !@options.show_belongs_to
+    macro = assoc.methods.to_s
+    return if %w[belongs_to referenced_in].include?(macro) && !@options.show_belongs_to
 
     # Skip "through" associations
     through = assoc.options.include?(:through)
@@ -301,27 +306,28 @@ class ModelsDiagram < AppDiagram
     end
     assoc_class_name.gsub!(/^::/, '')
 
-    if %w(has_one references_one embeds_one).include?(macro)
+    if %w[has_one references_one embeds_one].include?(macro)
       assoc_type = 'one-one'
     elsif macro == 'has_many' && (!assoc.options[:through]) ||
-          %w(references_many embeds_many).include?(macro)
+          %w[references_many embeds_many].include?(macro)
       assoc_type = 'one-many'
     elsif macro == 'belongs_to'
       assoc_type = 'belongs-to'
     else # habtm or has_many, :through
       # Add FAKE associations too in order to understand mistakes
       return if @habtm.include? [assoc_class_name, class_name, assoc_name]
+
       assoc_type = 'many-many'
       @habtm << [class_name, assoc_class_name, assoc_name]
     end
     # from patch #12384
     # @graph.add_edge [assoc_type, class_name, assoc.class_name, assoc_name]
     @graph.add_edge [assoc_type, class_name, assoc_class_name, assoc_name]
-  end # process_association
+  end
 
   # Process a DataMapper relationship
   def process_datamapper_relationship(class_name, relation)
-    STDERR.puts "- Processing DataMapper model relationship #{relation.name}" if @options.verbose
+    warn "- Processing DataMapper model relationship #{relation.name}" if @options.verbose
 
     # Skip "belongs_to" relationships
     dm_type = relation.class.to_s.split('::')[-2]
@@ -354,4 +360,4 @@ class ModelsDiagram < AppDiagram
 
     @graph.add_edge [rel_type, class_name, assoc_class_name, assoc_name]
   end
-end # class ModelsDiagram
+end
