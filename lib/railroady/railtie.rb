@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require 'railroady'
 require 'rails'
+
 module RailRoady
   class Railtie < Rails::Railtie
     rake_tasks do

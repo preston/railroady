@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # RailRoady - RoR diagrams generator
 # http://railroad.rubyforge.org
 #
@@ -40,7 +42,7 @@ class OptionsStruct < OpenStruct
                      config_file: 'config/environment',
                      app_name: 'railroady', app_human_name: 'Railroady', app_version: '', copyright: '' }
     super(init_options.merge(args))
-  end # initialize
+  end
 
   def parse(args)
     @opt_parser = OptionParser.new do |opts|
@@ -138,11 +140,11 @@ class OptionsStruct < OpenStruct
       opts.separator ''
       opts.separator 'Other options:'
       opts.on('-h', '--help', 'Show this message') do
-        STDOUT.print "#{opts}\n"
+        $stdout.print "#{opts}\n"
         exit
       end
       opts.on('--version', 'Show version and copyright') do
-        STDOUT.print "#{app_human_name} version #{app_version}\n\n" \
+        $stdout.print "#{app_human_name} version #{app_version}\n\n" \
                      "#{copyright}\nThis is free software; see the source " \
                      "for copying conditions.\n\n"
         exit
@@ -154,7 +156,7 @@ class OptionsStruct < OpenStruct
       opts.separator 'Commands (you must supply one of these):'
       opts.on('-M', '--models', 'Generate models diagram') do |_c|
         if command != ''
-          STDERR.print "Error: Can only generate one diagram type\n\n"
+          $stderr.print "Error: Can only generate one diagram type\n\n"
           exit 1
         else
           self.command = 'models'
@@ -162,16 +164,16 @@ class OptionsStruct < OpenStruct
       end
       opts.on('-C', '--controllers', 'Generate controllers diagram') do |_c|
         if command != ''
-          STDERR.print "Error: Can only generate one diagram type\n\n"
+          $stderr.print "Error: Can only generate one diagram type\n\n"
           exit 1
         else
           self.command = 'controllers'
         end
       end
       # From Ana Nelson's patch
-      opts.on('-A', '--aasm', "Generate \"acts as state machine\" diagram") do |_c|
+      opts.on('-A', '--aasm', 'Generate "acts as state machine" diagram') do |_c|
         if command == 'controllers'
-          STDERR.print "Error: Can only generate one diagram type\n\n"
+          $stderr.print "Error: Can only generate one diagram type\n\n"
           exit 1
         else
           self.command = 'aasm'
@@ -180,7 +182,7 @@ class OptionsStruct < OpenStruct
       opts.separator ''
       opts.separator 'For bug reporting and additional information, please see:'
       opts.separator 'http://railroad.rubyforge.org/'
-    end # do
+    end
 
     begin
       @opt_parser.parse!(args)
@@ -193,12 +195,12 @@ class OptionsStruct < OpenStruct
     rescue OptionParser::MissingArgument
       option_error 'Missing argument'
     end
-  end  # parse
+  end
 
   private
 
   def option_error(msg)
-    STDERR.print "Error: #{msg}\n\n #{@opt_parser}\n"
+    $stderr.print "Error: #{msg}\n\n #{@opt_parser}\n"
     exit 1
   end
-end  # class OptionsStruct
+end

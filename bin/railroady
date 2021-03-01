@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # RailRoady - RoR diagrams generator
 # http://github.com/preston/railroady
@@ -25,7 +26,8 @@ APP_HUMAN_NAME = 'RailRoady'
 APP_VERSION    = RailRoady::VERSION
 COPYRIGHT      = 'Copyright (C) 2007-2008 Javier Smaldone, 2009 Peter Hoeg, 2010-2015 Preston Lee'
 
-options = OptionsStruct.new(app_name: APP_NAME, app_human_name: APP_HUMAN_NAME, app_version: APP_VERSION, copyright: COPYRIGHT)
+options = OptionsStruct.new(app_name: APP_NAME, app_human_name: APP_HUMAN_NAME, app_version: APP_VERSION,
+                            copyright: COPYRIGHT)
 
 options.parse ARGV
 
@@ -44,7 +46,7 @@ when 'controllers'
 when 'aasm'
   diagram = AasmDiagram.new(options)
 else
-  STDERR.print "#{APP_HUMAN_NAME} v#{APP_VERSION}\n" \
+  $stderr.print "#{APP_HUMAN_NAME} v#{APP_VERSION}\n" \
     "Error: You must supply a command\n" \
     "  (try #{APP_NAME} -h)\n\n"
   exit 1
