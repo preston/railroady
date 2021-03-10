@@ -60,42 +60,66 @@ describe ModelsDiagram do
       end
     end
   end
-  
+
   describe '#extract_class_name' do
     describe 'class can be found' do
       describe 'module without namespace' do
         module AuthorSettings
         end
-        
+
         it 'does not take every models subdirectory as a namespace' do
           md = ModelsDiagram.new(OptionsStruct.new)
-          
+
           md.extract_class_name('test/file_fixture/app/models/concerns/author_settings.rb').must_equal 'AuthorSettings'
         end
       end
-      
+
       describe 'module with parent namespace / class' do
         class User
           module Authentication
           end
         end
-        
+
         it 'does not take every models subdirectory as a namespace' do
           md = ModelsDiagram.new(OptionsStruct.new)
-          
+
           md.extract_class_name('test/file_fixture/app/models/concerns/user/authentication.rb').must_equal 'User::Authentication'
         end
       end
     end
-    
+
     describe 'class cannot be found' do
       it 'returns the full class name' do
         md = ModelsDiagram.new(OptionsStruct.new)
-        
+
         md.extract_class_name('test/file_fixture/app/models/concerns/dummy.rb').must_equal 'Concerns::Dummy'
       end
     end
   end
+
+describe '#process_association' do
+  after do
+    Object.send(:remove_const, :Child)
+  end
+  before do
+    module ActiveRecord
+      class Base; end;
+    end
+    class Child < ActiveRecord::Base;
+      def self.macro
+        ''
+      end
+      def self.options
+        []
+      end
+    end;
+  end
+  it 'should exclude a specific class' do
+    options = OptionsStruct.new(excluded_classes: ['Child'])
+    md = ModelsDiagram.new(options)
+    md.process_association('fake', Child).must_equal nil
+  end
+end
 
   describe '#include_inheritance?' do
     after do

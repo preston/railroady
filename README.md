@@ -84,13 +84,14 @@ Alternatively, you may run the 'railroady' command-line program at the Rails app
           	--all-columns                Show all columns (not just content columns)
           	--hide-magic                 Hide magic field names
           	--hide-types                 Hide attributes type
+        --excluded_classes class1[,classN] Exclude given classes (helpful when you can't reference a file, for example with PaperTrail::Version or other gems)
       	-j, --join                       Concentrate edges
       	-m, --modules                    Include modules
       	-p, --plugins-models             Include plugins models
       	-z, --engine-models              Include engine models
           	--include-concerns           Include models in concerns subdirectory
       	-t, --transitive                 Include transitive associations
-                                       	(through inheritance)
+                                       	(through inheritance)                                
 
   	Controllers diagram options:
           	--hide-public                Hide public methods

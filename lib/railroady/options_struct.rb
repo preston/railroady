@@ -17,6 +17,7 @@ class OptionsStruct < OpenStruct
                      brief: false,
                      specify: [],
                      exclude: [],
+                     excluded_classes: [],
                      inheritance: false,
                      join: false,
                      label: false,
@@ -58,6 +59,9 @@ class OptionsStruct < OpenStruct
       end
       opts.on('-e', '--exclude file1[,fileN]', Array, 'Exclude given files') do |list|
         self.exclude = list
+      end
+      opts.on('--excluded_classes class1[,classN]', Array, 'Exclude given classes') do |list|
+        self.excluded_classes = list
       end
       opts.on('-i', '--inheritance', 'Include inheritance relations') do |i|
         self.inheritance = i
